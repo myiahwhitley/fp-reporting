@@ -171,20 +171,15 @@ textarea{resize:vertical;min-height:80px;line-height:1.5;}
         <div class="picon">👍</div>
         <div class="pname">Meta (FB/IG)</div>
       </div>
-      <div class="platform-card" onclick="togglePlatform('bing',this)">
-        <input type="checkbox" id="bing">
-        <div class="picon">🔷</div>
-        <div class="pname">Microsoft/Bing Ads</div>
-      </div>
       <div class="platform-card" onclick="togglePlatform('lsa',this)">
         <input type="checkbox" id="lsa">
         <div class="picon">📌</div>
         <div class="pname">LSA / GBP</div>
       </div>
-      <div class="platform-card" onclick="togglePlatform('sem',this)">
-        <input type="checkbox" id="sem">
-        <div class="picon">🌐</div>
-        <div class="pname">SEMrush / SEO</div>
+      <div class="platform-card" onclick="togglePlatform('gsc',this)">
+        <input type="checkbox" id="gsc">
+        <div class="picon">🔍</div>
+        <div class="pname">Search Console</div>
       </div>
     </div>
 
@@ -237,14 +232,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.5;}
       </ul>
     </div>
 
-    <!-- Bing exports -->
-    <div class="export-panel" id="exp-bing">
-      <div class="export-title">Microsoft / Bing Ads — Files to Pull</div>
-      <ul class="export-list">
-        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Bing_campaign_performance.csv</b><span>Reports → Performance → Campaign → Export. Date range = report period.</span></div></li>
-      </ul>
-    </div>
-
     <!-- LSA exports -->
     <div class="export-panel" id="exp-lsa">
       <div class="export-title">LSA / Google Business Profile — Files to Pull</div>
@@ -254,13 +241,14 @@ textarea{resize:vertical;min-height:80px;line-height:1.5;}
       </ul>
     </div>
 
-    <!-- SEMrush exports -->
-    <div class="export-panel" id="exp-sem">
-      <div class="export-title">SEMrush / SEO — Files to Pull</div>
+    <!-- Google Search Console exports -->
+    <div class="export-panel" id="exp-gsc">
+      <div class="export-title">Google Search Console — Files to Pull</div>
       <ul class="export-list">
-        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Organic keywords export</b><span>SEMrush → Domain Overview or Organic Research → Export top ranking keywords. Include position, volume, traffic %, URL.</span></div></li>
-        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Position tracking export</b><span>If position tracking is set up → Ranking Distribution → Export. Shows MoM position changes for tracked keywords.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Queries export (CSV)</b><span>Search Console → Performance → Search results → set date range → Export → Download CSV. Includes query, clicks, impressions, CTR, avg. position.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Pages export (CSV)</b><span>Performance → Pages tab → Export → Download CSV. Shows which URLs are driving organic traffic.</span></div></li>
       </ul>
+      <div class="note-box" style="margin-top:12px;margin-bottom:0;">💡 Search Console should be linked to GA4 — if it is, query data may already appear in the GA4 Acquisition → Search Console report.</div>
     </div>
   </div>
 
@@ -347,7 +335,7 @@ function updateProgress() {
     document.getElementById('dateStart').value,
     document.getElementById('dateEnd').value,
   ].filter(Boolean).length;
-  const platforms = ['gads','ga4','callrail','ttd','meta','bing','lsa','sem']
+  const platforms = ['gads','ga4','callrail','ttd','meta','lsa','gsc']
     .filter(id => document.getElementById(id).checked).length;
   const total = 3 + (platforms > 0 ? 1 : 0);
   const pct = Math.min(100, Math.round((filled + (platforms > 0 ? 1 : 0)) / total * 100));
@@ -363,8 +351,8 @@ function generateBrief() {
 
   const platforms = {
     gads: 'Google Ads', ga4: 'GA4/Website', callrail: 'CallRail',
-    ttd: 'Programmatic (TTD)', meta: 'Meta Ads', bing: 'Microsoft/Bing Ads',
-    lsa: 'LSA/GBP', sem: 'SEMrush/SEO'
+    ttd: 'Programmatic (TTD)', meta: 'Meta Ads',
+    lsa: 'LSA/GBP', gsc: 'Google Search Console'
   };
   const activePlatforms = Object.entries(platforms)
     .filter(([id]) => document.getElementById(id).checked)
