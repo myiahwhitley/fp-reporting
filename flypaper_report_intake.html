@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Intake Form | Flypaper</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0D0D1C;--canvas:#F4F4F8;--white:#fff;
+  --lime:#6EB832;--lime-bg:rgba(110,184,50,.13);--lime-txt:#4A8A1A;
+  --purple:#7B5EA7;--purple-bg:#EDEBF9;--purple-txt:#4A3490;
+  --border:#E0E0EC;--txt:#1A1A2E;--muted:#6B6B80;--faint:#9090A8;
+  --neg:#C05050;--neg-bg:#FAEAEA;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--canvas);color:var(--txt);padding-bottom:60px;}
+/* NAV */
+.nav{background:var(--navy);display:flex;align-items:center;padding:0 24px;height:54px;position:sticky;top:0;z-index:200;}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-logo img{height:26px;width:auto;}
+.nav-title{color:rgba(255,255,255,.55);font-size:13px;margin-left:16px;padding-left:16px;border-left:1px solid rgba(255,255,255,.15);}
+/* LAYOUT */
+.container{max-width:780px;margin:0 auto;padding:32px 24px;}
+.hero{margin-bottom:32px;}
+.hero h1{font-size:24px;font-weight:700;margin-bottom:6px;}
+.hero p{font-size:14px;color:var(--muted);line-height:1.6;}
+/* SECTIONS */
+.section{background:var(--white);border:.5px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;}
+.section-title{font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.section-title .num{background:var(--purple-bg);color:var(--purple-txt);border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+/* FORM ELEMENTS */
+.field{margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+label{display:block;font-size:12px;font-weight:600;color:var(--txt);margin-bottom:5px;}
+label .req{color:var(--neg);margin-left:2px;}
+label .hint{font-weight:400;color:var(--muted);margin-left:6px;}
+input[type=text],input[type=date],select,textarea{
+  width:100%;padding:9px 12px;border:.5px solid var(--border);border-radius:8px;
+  font-size:13px;font-family:inherit;color:var(--txt);background:var(--white);
+  outline:none;transition:border-color .15s;
+}
+input[type=text]:focus,input[type=date]:focus,select:focus,textarea:focus{border-color:var(--purple);}
+textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:560px){.two-col{grid-template-columns:1fr;}}
+/* PLATFORM GRID */
+.platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+.platform-card{border:.5px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;user-select:none;}
+.platform-card:hover{border-color:var(--purple);}
+.platform-card.selected{border-color:var(--lime);background:var(--lime-bg);}
+.platform-card input[type=checkbox]{display:none;}
+.platform-card .pname{font-size:13px;font-weight:600;margin-top:6px;}
+.platform-card .picon{font-size:20px;}
+.platform-card.selected .pname{color:var(--lime-txt);}
+/* EXPORT PANELS */
+.export-panel{display:none;margin-top:16px;border-top:.5px solid var(--border);padding-top:16px;}
+.export-panel.visible{display:block;}
+.export-title{font-size:12px;font-weight:700;color:var(--purple-txt);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.export-title::before{content:'📥';font-size:14px;}
+.export-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.export-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;}
+.export-list li .check-wrap{padding-top:1px;flex-shrink:0;}
+.export-list li input[type=checkbox]{accent-color:var(--lime);width:14px;height:14px;cursor:pointer;}
+.export-list li .exp-label{line-height:1.5;}
+.export-list li .exp-label b{display:block;font-weight:600;}
+.export-list li .exp-label span{color:var(--muted);font-size:12px;}
+/* TOGGLE NOTES */
+.note-box{background:var(--purple-bg);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:var(--purple-txt);line-height:1.6;margin-bottom:14px;}
+/* SENSITIVITY */
+.sensitivity-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:560px){.sensitivity-grid{grid-template-columns:1fr;}}
+.sens-card{border:.5px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;}
+.sens-card:hover{border-color:var(--purple);}
+.sens-card input[type=checkbox]{accent-color:var(--neg);width:13px;height:13px;cursor:pointer;margin-right:7px;}
+.sens-card label{display:flex;align-items:center;font-size:13px;font-weight:600;cursor:pointer;margin:0;}
+.sens-card p{font-size:12px;color:var(--muted);margin-top:4px;padding-left:20px;line-height:1.4;}
+/* OUTPUT */
+.output-section{background:var(--navy);border-radius:12px;padding:24px;margin-top:24px;}
+.output-section h2{color:#fff;font-size:14px;font-weight:600;margin-bottom:12px;}
+#briefOutput{
+  width:100%;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.15);
+  border-radius:8px;color:#C8E6A0;font-family:'SF Mono',Monaco,monospace;font-size:12px;
+  line-height:1.6;padding:16px;min-height:200px;resize:vertical;outline:none;
+}
+.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+.btn-primary{background:var(--lime);color:#fff;}
+.btn-primary:hover{background:#5DA028;}
+.btn-secondary{background:rgba(255,255,255,.12);color:#fff;}
+.btn-secondary:hover{background:rgba(255,255,255,.2);}
+.copy-confirm{color:var(--lime);font-size:12px;font-weight:600;opacity:0;transition:opacity .3s;align-self:center;}
+.copy-confirm.show{opacity:1;}
+/* PROGRESS */
+.progress-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-bottom:24px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--lime);border-radius:2px;transition:width .3s;width:0%;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAzQAAADgCAMAAADi69PhAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAFZaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJYTVAgQ29yZSA1LjQuMCI+CiAgIDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+CiAgICAgIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiCiAgICAgICAgICAgIHhtbG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIj4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+CkzCJ1kAAAMAUExURUxpcQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAN0jDswAAAABdFJOUwDZiHkiAAABIklEQVR42u3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAMBuAABHgAAAABJRU5ErkJggg==" alt="Flypaper" style="opacity:.6;">
+    <span class="nav-title">Report Intake Form</span>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <h1>Client Report Intake</h1>
+    <p>Fill out each section, check off the exports you've pulled, then click <strong>Generate Brief</strong> at the bottom. Copy the output and paste it at the start of a new Claude session to kick off the report build.</p>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- ── SECTION 1: CLIENT INFO ── -->
+  <div class="section">
+    <div class="section-title"><span class="num">1</span> Client & Report Info</div>
+    <div class="two-col">
+      <div class="field">
+        <label>Client Name <span class="req">*</span></label>
+        <input type="text" id="clientName" placeholder="e.g. American Air HVAC" oninput="updateProgress()">
+      </div>
+      <div class="field">
+        <label>Industry <span class="hint">(optional)</span></label>
+        <input type="text" id="industry" placeholder="e.g. HVAC, Legal, Healthcare">
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field">
+        <label>Report Period Start <span class="req">*</span></label>
+        <input type="date" id="dateStart" oninput="updateProgress()">
+      </div>
+      <div class="field">
+        <label>Report Period End <span class="req">*</span></label>
+        <input type="date" id="dateEnd" oninput="updateProgress()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Account Manager</label>
+      <input type="text" id="amName" placeholder="Your name">
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: ACTIVE PLATFORMS ── -->
+  <div class="section">
+    <div class="section-title"><span class="num">2</span> Active Platforms</div>
+    <div class="note-box">Check every platform that was active for this client this month. Export instructions will appear below each one.</div>
+    <div class="platform-grid">
+      <div class="platform-card" onclick="togglePlatform('gads',this)">
+        <input type="checkbox" id="gads">
+        <div class="picon">🔍</div>
+        <div class="pname">Google Ads</div>
+      </div>
+      <div class="platform-card" onclick="togglePlatform('ga4',this)">
+        <input type="checkbox" id="ga4">
+        <div class="picon">📊</div>
+        <div class="pname">GA4 / Website</div>
+      </div>
+      <div class="platform-card" onclick="togglePlatform('callrail',this)">
+        <input type="checkbox" id="callrail">
+        <div class="picon">📞</div>
+        <div class="pname">CallRail</div>
+      </div>
+      <div class="platform-card" onclick="togglePlatform('ttd',this)">
+        <input type="checkbox" id="ttd">
+        <div class="picon">📺</div>
+        <div class="pname">Programmatic (TTD)</div>
+      </div>
+      <div class="platform-card" onclick="togglePlatform('meta',this)">
+        <input type="checkbox" id="meta">
+        <div class="picon">👍</div>
+        <div class="pname">Meta (FB/IG)</div>
+      </div>
+      <div class="platform-card" onclick="togglePlatform('bing',this)">
+        <input type="checkbox" id="bing">
+        <div class="picon">🔷</div>
+        <div class="pname">Microsoft/Bing Ads</div>
+      </div>
+      <div class="platform-card" onclick="togglePlatform('lsa',this)">
+        <input type="checkbox" id="lsa">
+        <div class="picon">📌</div>
+        <div class="pname">LSA / GBP</div>
+      </div>
+      <div class="platform-card" onclick="togglePlatform('sem',this)">
+        <input type="checkbox" id="sem">
+        <div class="picon">🌐</div>
+        <div class="pname">SEMrush / SEO</div>
+      </div>
+    </div>
+
+    <!-- Google Ads exports -->
+    <div class="export-panel" id="exp-gads">
+      <div class="export-title">Google Ads — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Campaign performance.csv</b><span>Campaigns → All campaigns → Download → CSV. Date range = report period. Columns: Campaign, Impressions, Clicks, CTR, Avg CPC, Conversions, Conv. Rate.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Ad group performance.csv</b><span>Ad Groups → Download → CSV. Same date range. Columns: Campaign, Ad Group, Impressions, Clicks, CTR, Avg CPC, Conversions.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Conversions.csv</b><span>Goals → Conversions → Download. Breakdown by conversion action.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Auction insights - search.csv</b><span>Campaigns → Auction insights → Download. Shows competitor overlap.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Search terms.csv</b><span>Keywords → Search terms → Download. Filter to report period.</span></div></li>
+      </ul>
+    </div>
+
+    <!-- GA4 exports -->
+    <div class="export-panel" id="exp-ga4">
+      <div class="export-title">GA4 / Website — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Traffic_acquisition_Session_source_medium.csv</b><span>Reports → Acquisition → Traffic acquisition. Set date range. Download as CSV. Primary dimension: Session source / medium.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Pages_and_screens_Page_path.csv</b><span>Reports → Engagement → Pages and screens. Download as CSV. Columns: Page path, Views, Users, Key events.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Queries_Organic_Google_Search_query.csv</b><span>Reports → Acquisition → Search Console → Queries (if linked). Download as CSV. Or pull from Search Console directly.</span></div></li>
+      </ul>
+    </div>
+
+    <!-- CallRail exports -->
+    <div class="export-panel" id="exp-callrail">
+      <div class="export-title">CallRail — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Call List-[date].xlsx</b><span>Calls → All calls → Export. Set date range. Export as Excel. Includes individual call records with tags, duration, source, keyword.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Call attribution-[date].xlsx</b><span>Attribution → Source report → Export. Shows call volume by source/medium with qualification rates.</span></div></li>
+      </ul>
+    </div>
+
+    <!-- TTD exports -->
+    <div class="export-panel" id="exp-ttd">
+      <div class="export-title">The Trade Desk (Programmatic) — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Performance Insights (Kokai) XLSX</b><span>Reports → Performance Insights → Export. Set date range to full month. Export as Excel. This single file contains both Display and CTV — distinguished by the "Media Type" column (Video = CTV, Display = Display).</span></div></li>
+      </ul>
+      <div class="note-box" style="margin-top:12px;margin-bottom:0;">⚠️ VTC (view-through conversions) may not appear in this export. Note if VTC data needs to be pulled separately from the TTD dashboard.</div>
+    </div>
+
+    <!-- Meta exports -->
+    <div class="export-panel" id="exp-meta">
+      <div class="export-title">Meta Ads — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Meta_campaigns_[date].csv</b><span>Ads Manager → Campaigns → Export table data → CSV. Date range = report period. Columns: Campaign name, Impressions, Reach, Clicks, CTR, CPM, CPC, Results, Cost per result.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Meta_adsets_[date].csv</b><span>Ad Sets tab → Export. Same columns. Include audience/targeting breakdown if available.</span></div></li>
+      </ul>
+    </div>
+
+    <!-- Bing exports -->
+    <div class="export-panel" id="exp-bing">
+      <div class="export-title">Microsoft / Bing Ads — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Bing_campaign_performance.csv</b><span>Reports → Performance → Campaign → Export. Date range = report period.</span></div></li>
+      </ul>
+    </div>
+
+    <!-- LSA exports -->
+    <div class="export-panel" id="exp-lsa">
+      <div class="export-title">LSA / Google Business Profile — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>LSA summary screenshot or CSV export</b><span>Local Services Ads dashboard → Download report. Include leads, cost per lead, lead status breakdown.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>GBP Insights export</b><span>Google Business Profile → Performance → Export (if available). Calls, direction requests, website clicks.</span></div></li>
+      </ul>
+    </div>
+
+    <!-- SEMrush exports -->
+    <div class="export-panel" id="exp-sem">
+      <div class="export-title">SEMrush / SEO — Files to Pull</div>
+      <ul class="export-list">
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Organic keywords export</b><span>SEMrush → Domain Overview or Organic Research → Export top ranking keywords. Include position, volume, traffic %, URL.</span></div></li>
+        <li><div class="check-wrap"><input type="checkbox"></div><div class="exp-label"><b>Position tracking export</b><span>If position tracking is set up → Ranking Distribution → Export. Shows MoM position changes for tracked keywords.</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: DATA SENSITIVITIES ── -->
+  <div class="section">
+    <div class="section-title"><span class="num">3</span> Data Sensitivities</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Check anything that should NOT appear in the client-facing report.</p>
+    <div class="sensitivity-grid">
+      <div class="sens-card">
+        <label><input type="checkbox" id="hideSpend"> Hide total spend / budget</label>
+        <p>Dollar totals for campaigns won't appear anywhere in the report.</p>
+      </div>
+      <div class="sens-card">
+        <label><input type="checkbox" id="hideCPC"> Hide CPC</label>
+        <p>Cost-per-click figures will be removed from all tables and stat cards.</p>
+      </div>
+      <div class="sens-card">
+        <label><input type="checkbox" id="hideCPM"> Hide CPM</label>
+        <p>Cost-per-thousand impressions won't appear in programmatic sections.</p>
+      </div>
+      <div class="sens-card">
+        <label><input type="checkbox" id="hideConvValue"> Hide conversion value / ROAS</label>
+        <p>Revenue and return-on-ad-spend figures will be excluded.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: CONTEXT & NOTES ── -->
+  <div class="section">
+    <div class="section-title"><span class="num">4</span> Context & Notes for Claude</div>
+    <div class="field">
+      <label>Campaign changes this month <span class="hint">(new campaigns launched, paused, budget changes)</span></label>
+      <textarea id="campaignChanges" placeholder="e.g. Launched new Generac campaign 4/10. Paused Display retargeting mid-month due to budget reallocation."></textarea>
+    </div>
+    <div class="field">
+      <label>Highlights to call out <span class="hint">(wins, anomalies, things the client should notice)</span></label>
+      <textarea id="highlights" placeholder="e.g. CTR on Residential Heating was the highest we've seen at 7.4%. Organic call quality was notably better than paid this month."></textarea>
+    </div>
+    <div class="field">
+      <label>Areas of concern <span class="hint">(performance dips, anything to address carefully)</span></label>
+      <textarea id="concerns" placeholder="e.g. Display CPM crept up toward end of month — may need creative refresh. Abandoned call rate is high."></textarea>
+    </div>
+    <div class="field">
+      <label>Additional context <span class="hint">(seasonality, client goals, anything else Claude should know)</span></label>
+      <textarea id="additionalContext" placeholder="e.g. Client is prepping for summer AC season. Goal is to drive 100+ qualified calls/month."></textarea>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: FILE NAMES ── -->
+  <div class="section">
+    <div class="section-title"><span class="num">5</span> Confirm Your File Names</div>
+    <div class="note-box">Paste the exact file names as exported. This helps Claude map each file to the right section without guessing.</div>
+    <div class="field">
+      <label>List your export files <span class="hint">(one per line)</span></label>
+      <textarea id="fileNames" rows="8" placeholder="Campaign performance.csv&#10;Ad group performance (1).csv&#10;Auction insights - search.csv&#10;Call List-2026-05-20.xlsx&#10;Call attribution-2026-05-20.xlsx&#10;American Air HVAC _ LastMonth _ Performance Insights (Kokai)_2026-04-01_2026-05-01.xlsx&#10;Traffic_acquisition_Session_source_medium.csv&#10;Queries_Organic_Google_Search_query.csv&#10;Pages_and_screens_Page_path_and_screen_class.csv"></textarea>
+    </div>
+  </div>
+
+  <!-- ── OUTPUT ── -->
+  <div class="output-section">
+    <h2>📋 Generated Brief for Claude</h2>
+    <textarea id="briefOutput" readonly placeholder="Fill out the form above and click Generate Brief…"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generateBrief()">Generate Brief</button>
+      <button class="btn btn-secondary" onclick="copyBrief()">Copy to Clipboard</button>
+      <span class="copy-confirm" id="copyConfirm">✓ Copied!</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePlatform(id, card) {
+  const cb = document.getElementById(id);
+  cb.checked = !cb.checked;
+  card.classList.toggle('selected', cb.checked);
+  const panel = document.getElementById('exp-' + id);
+  if (panel) panel.classList.toggle('visible', cb.checked);
+  updateProgress();
+}
+
+function updateProgress() {
+  const filled = [
+    document.getElementById('clientName').value.trim(),
+    document.getElementById('dateStart').value,
+    document.getElementById('dateEnd').value,
+  ].filter(Boolean).length;
+  const platforms = ['gads','ga4','callrail','ttd','meta','bing','lsa','sem']
+    .filter(id => document.getElementById(id).checked).length;
+  const total = 3 + (platforms > 0 ? 1 : 0);
+  const pct = Math.min(100, Math.round((filled + (platforms > 0 ? 1 : 0)) / total * 100));
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function generateBrief() {
+  const client   = document.getElementById('clientName').value.trim() || '[Client Name]';
+  const industry = document.getElementById('industry').value.trim();
+  const start    = document.getElementById('dateStart').value || '[start]';
+  const end      = document.getElementById('dateEnd').value || '[end]';
+  const am       = document.getElementById('amName').value.trim();
+
+  const platforms = {
+    gads: 'Google Ads', ga4: 'GA4/Website', callrail: 'CallRail',
+    ttd: 'Programmatic (TTD)', meta: 'Meta Ads', bing: 'Microsoft/Bing Ads',
+    lsa: 'LSA/GBP', sem: 'SEMrush/SEO'
+  };
+  const activePlatforms = Object.entries(platforms)
+    .filter(([id]) => document.getElementById(id).checked)
+    .map(([,name]) => name);
+
+  const sensitivities = [];
+  if (document.getElementById('hideSpend').checked) sensitivities.push('total spend/budget');
+  if (document.getElementById('hideCPC').checked) sensitivities.push('CPC');
+  if (document.getElementById('hideCPM').checked) sensitivities.push('CPM');
+  if (document.getElementById('hideConvValue').checked) sensitivities.push('conversion value/ROAS');
+
+  const campaignChanges = document.getElementById('campaignChanges').value.trim();
+  const highlights      = document.getElementById('highlights').value.trim();
+  const concerns        = document.getElementById('concerns').value.trim();
+  const additionalCtx   = document.getElementById('additionalContext').value.trim();
+  const fileNames       = document.getElementById('fileNames').value.trim();
+
+  let brief = `Hi! I need you to build a Flypaper-branded HTML report for the following client. Here are all the details:\n\n`;
+  brief += `══════════════════════════════════\n`;
+  brief += `CLIENT REPORT BRIEF\n`;
+  brief += `══════════════════════════════════\n\n`;
+  brief += `CLIENT: ${client}\n`;
+  if (industry) brief += `INDUSTRY: ${industry}\n`;
+  brief += `REPORT PERIOD: ${start} to ${end}\n`;
+  if (am) brief += `ACCOUNT MANAGER: ${am}\n`;
+  brief += `\n`;
+
+  if (activePlatforms.length) {
+    brief += `ACTIVE PLATFORMS:\n`;
+    activePlatforms.forEach(p => brief += `  • ${p}\n`);
+    brief += `\n`;
+  }
+
+  if (sensitivities.length) {
+    brief += `⚠️  DATA SENSITIVITIES — DO NOT SHOW IN REPORT:\n`;
+    sensitivities.forEach(s => brief += `  • ${s}\n`);
+    brief += `\n`;
+  } else {
+    brief += `DATA SENSITIVITIES: None — show all metrics including spend, CPC, CPM.\n\n`;
+  }
+
+  if (campaignChanges) {
+    brief += `CAMPAIGN CHANGES THIS MONTH:\n${campaignChanges}\n\n`;
+  }
+  if (highlights) {
+    brief += `HIGHLIGHTS TO CALL OUT:\n${highlights}\n\n`;
+  }
+  if (concerns) {
+    brief += `AREAS OF CONCERN:\n${concerns}\n\n`;
+  }
+  if (additionalCtx) {
+    brief += `ADDITIONAL CONTEXT:\n${additionalCtx}\n\n`;
+  }
+
+  if (fileNames) {
+    brief += `EXPORT FILES (in the shared folder):\n`;
+    fileNames.split('\n').filter(f => f.trim()).forEach(f => brief += `  • ${f.trim()}\n`);
+    brief += `\n`;
+  }
+
+  brief += `══════════════════════════════════\n`;
+  brief += `Please use the Flypaper brand system (navy #0D0D1C nav, canvas #F4F4F8 background, lime #6EB832 accent, purple #7B5EA7 secondary). Build a single self-contained HTML file. Use Chart.js from CDN for all charts. Save it as a new version in the Reporting folder when complete.\n`;
+
+  document.getElementById('briefOutput').value = brief;
+}
+
+function copyBrief() {
+  const output = document.getElementById('briefOutput');
+  if (!output.value.trim()) { generateBrief(); }
+  output.select();
+  document.execCommand('copy');
+  const confirm = document.getElementById('copyConfirm');
+  confirm.classList.add('show');
+  setTimeout(() => confirm.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
