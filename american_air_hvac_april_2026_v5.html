@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>American Air HVAC — April 2026 | Flypaper</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0D0D1C;--canvas:#F4F4F8;--white:#fff;
+  --lime:#6EB832;--lime-bg:rgba(110,184,50,.13);--lime-txt:#4A8A1A;
+  --purple:#7B5EA7;--purple-bg:#EDEBF9;--purple-txt:#4A3490;
+  --border:#E8E8F0;--txt:#1A1A2E;--muted:#6B6B80;--faint:#9090A8;
+  --pos:#5A9E20;--pos-bg:#EDF7E0;--neg:#C05050;--neg-bg:#FAEAEA;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--canvas);color:var(--txt);}
+.nav{background:var(--navy);display:flex;align-items:center;padding:0 20px;height:54px;position:sticky;top:0;z-index:200;gap:4px;}
+.nav-logo{display:flex;align-items:center;gap:10px;margin-right:20px;flex-shrink:0;}
+.nav-logo img{height:26px;width:auto;border-radius:0;}
+.nav-logo span{color:#fff;font-size:14px;font-weight:600;letter-spacing:.02em;}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab{color:rgba(255,255,255,.55);font-size:13px;font-weight:500;padding:6px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;border:none;background:none;transition:all .15s;}
+.nav-tab:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);}
+.nav-tab.active{background:var(--lime-bg);color:#8ED44A;font-weight:600;}
+.page{display:none;padding:28px 24px;max-width:1060px;margin:0 auto;}
+.page.active{display:block;}
+.page-header{margin-bottom:16px;}
+.page-header h1{font-size:20px;font-weight:600;}
+.page-header p{font-size:13px;color:var(--muted);margin-top:4px;}
+.chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.chip{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:.02em;}
+.chip-lime{background:var(--pos-bg);color:var(--lime-txt);}
+.chip-purple{background:var(--purple-bg);color:var(--purple-txt);}
+.chip-gray{background:#E8E8F2;color:#444460;}
+.chip-neg{background:var(--neg-bg);color:var(--neg);}
+.sec{font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin:24px 0 12px;}
+.sec:first-of-type{margin-top:0;}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;}
+.sc{background:var(--white);border:.5px solid var(--border);border-radius:10px;padding:16px;}
+.sc .lbl{font-size:11px;color:var(--faint);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.sc .val{font-size:26px;font-weight:700;line-height:1.1;}
+.sc .dlt{font-size:12px;font-weight:500;margin-top:5px;}
+.pos{color:var(--pos);}.neg{color:var(--neg);}.neu{color:var(--muted);}
+.card{background:var(--white);border:.5px solid var(--border);border-radius:10px;padding:18px 20px;margin-top:16px;}
+.card h3{font-size:13px;font-weight:600;margin-bottom:14px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+@media(max-width:680px){.two-col{grid-template-columns:1fr;}}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:var(--canvas);padding:8px 12px;text-align:left;color:var(--purple);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.tbl td{padding:8px 12px;border-top:.5px solid var(--border);}
+.tbl tr:hover td{background:#FAFAFF;}
+.tr{text-align:right;}
+.brs{display:flex;flex-direction:column;gap:10px;}
+.br{display:flex;align-items:center;gap:10px;}
+.br-lbl{width:150px;font-size:12px;color:var(--muted);flex-shrink:0;}
+.br-track{flex:1;background:var(--canvas);border-radius:3px;height:8px;overflow:hidden;}
+.br-fill{height:100%;border-radius:3px;}
+.br-val{width:65px;text-align:right;font-size:12px;font-weight:600;}
+/* Notes box — sits at top */
+.note{background:var(--purple-bg);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:11px 15px;font-size:12.5px;color:var(--purple-txt);margin-bottom:20px;line-height:1.7;}
+.note b{font-weight:700;}
+/* Sub-tabs */
+.sub-nav{display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--border);}
+.sub-tab{font-size:13px;font-weight:500;color:var(--muted);padding:8px 16px;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.sub-tab:hover{color:var(--txt);}
+.sub-tab.active{color:var(--purple);border-bottom-color:var(--purple);font-weight:600;}
+.sub-page{display:none;}
+.sub-page.active{display:block;}
+/* Campaign tabs */
+.camp-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.camp-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;cursor:pointer;border:.5px solid var(--border);background:var(--white);color:var(--muted);transition:all .15s;}
+.camp-btn:hover{border-color:var(--purple);color:var(--purple);}
+.camp-btn.active{background:var(--purple-bg);color:var(--purple-txt);border-color:var(--purple);}
+.camp-panel{display:none;}
+.camp-panel.active{display:block;}
+/* Branded split pills */
+.split-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.split-card{flex:1;min-width:200px;background:var(--white);border:.5px solid var(--border);border-radius:10px;padding:14px 16px;}
+.split-card .split-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.split-card.branded .split-label{color:var(--purple);}
+.split-card.nonbrand .split-label{color:var(--lime-txt);}
+.split-card .split-val{font-size:22px;font-weight:700;}
+.split-card .split-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;}
+.badge-you{background:var(--lime-bg);color:var(--lime-txt);}
+.footer{text-align:center;padding:28px 24px 20px;font-size:12px;color:var(--faint);}
+.footer a{color:var(--lime-txt);font-weight:600;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">
+    <img src="data:image/png;base64,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" alt="Flypaper">
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('overview',this)">Overview</button>
+    <button class="nav-tab" onclick="showPage('website',this)">Website</button>
+    <button class="nav-tab" onclick="showPage('seo',this)">SEO</button>
+    <button class="nav-tab" onclick="showPage('calls',this)">Calls</button>
+    <button class="nav-tab" onclick="showPage('sem',this)">Google Ads</button>
+    <button class="nav-tab" onclick="showPage('programmatic',this)">Programmatic</button>
+  </div>
+</nav>
+
+<!-- ═══ OVERVIEW ═══ -->
+<div id="page-overview" class="page active">
+  <div class="page-header">
+    <h1>American Air HVAC — April 2026</h1>
+    <p>Monthly digital performance · Flypaper</p>
+    <div class="chips">
+      <span class="chip chip-purple">Google Ads · Display · CTV · SEO</span>
+      <span class="chip chip-gray">Chattanooga / Ooltewah market</span>
+    </div>
+  </div>
+  <div class="note"><b>Month summary:</b> Strong overall performance across channels. Display drove the most website sessions (938) at an efficient $2.02 CPM. Google Ads Residential Heating was the standout campaign — highest CTR (7.41%) and lowest CPC ($6.20). Organic calls continue to show the highest lead quality (54.5% qualified rate). Generator interest is notable — /home-generators is the #2 most visited page on the site.</div>
+
+  <div class="sec">Channel Summary</div>
+  <div class="sg">
+    <div class="sc"><div class="lbl">Total Impressions</div><div class="val">263.8K</div><div class="dlt neu">Paid channels</div></div>
+    <div class="sc"><div class="lbl">Website Sessions</div><div class="val">2,008</div><div class="dlt pos">62% engagement rate</div></div>
+    <div class="sc"><div class="lbl">Total Calls</div><div class="val">113</div><div class="dlt neu">24 qualified</div></div>
+    <div class="sc"><div class="lbl">Google Ads Conv.</div><div class="val">54.88</div><div class="dlt pos">All campaigns</div></div>
+  </div>
+
+  <div class="sec">Impressions by Channel</div>
+  <div class="card">
+    <div class="brs">
+      <div class="br"><span class="br-lbl">Display</span><div class="br-track"><div class="br-fill" style="width:75%;background:var(--purple);opacity:.7;"></div></div><span class="br-val">198,035</span></div>
+      <div class="br"><span class="br-lbl">CTV</span><div class="br-track"><div class="br-fill" style="width:23%;background:var(--lime);"></div></div><span class="br-val">60,207</span></div>
+      <div class="br"><span class="br-lbl">Google Ads</span><div class="br-track"><div class="br-fill" style="width:2%;background:var(--lime);opacity:.6;"></div></div><span class="br-val">5,574</span></div>
+    </div>
+  </div>
+
+  <div class="sec">Website Sessions by Source</div>
+  <div class="card">
+    <div class="brs">
+      <div class="br"><span class="br-lbl">Display (Flypaper)</span><div class="br-track"><div class="br-fill" style="width:47%;background:var(--purple);opacity:.7;"></div></div><span class="br-val">938</span></div>
+      <div class="br"><span class="br-lbl">Direct</span><div class="br-track"><div class="br-fill" style="width:19%;background:var(--purple);opacity:.4;"></div></div><span class="br-val">378</span></div>
+      <div class="br"><span class="br-lbl">Google Ads</span><div class="br-track"><div class="br-fill" style="width:13%;background:var(--lime);"></div></div><span class="br-val">255</span></div>
+      <div class="br"><span class="br-lbl">Google Organic</span><div class="br-track"><div class="br-fill" style="width:10%;background:var(--lime);opacity:.65;"></div></div><span class="br-val">189</span></div>
+      <div class="br"><span class="br-lbl">CTV</span><div class="br-track"><div class="br-fill" style="width:6%;background:var(--lime);opacity:.45;"></div></div><span class="br-val">123</span></div>
+      <div class="br"><span class="br-lbl">Facebook</span><div class="br-track"><div class="br-fill" style="width:2%;background:#8888A0;opacity:.5;"></div></div><span class="br-val">48</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WEBSITE ═══ -->
+<div id="page-website" class="page">
+  <div class="page-header">
+    <h1>Website Traffic</h1>
+    <p>April 1–30, 2026 · GA4 — American Air HVAC</p>
+  </div>
+  <div class="note"><b>Strong engagement overall</b> — 61.95% engagement rate across 2,008 sessions. Display is the top traffic driver (938 sessions). /home-generators is the #2 most visited page, signaling meaningful generator interest. Google Ads and Organic sessions both show 78%+ engagement, indicating high-intent visitors from those channels.</div>
+
+  <div class="sec">Session Overview</div>
+  <div class="sg">
+    <div class="sc"><div class="lbl">Sessions</div><div class="val">2,008</div><div class="dlt neu">April total</div></div>
+    <div class="sc"><div class="lbl">Engaged Sessions</div><div class="val">1,244</div><div class="dlt pos">61.95% rate</div></div>
+    <div class="sc"><div class="lbl">Key Events</div><div class="val">157</div><div class="dlt pos">On-site conversions</div></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>Sessions by Source</h3>
+      <div style="height:200px;"><canvas id="trafficChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Engagement Rate by Source</h3>
+      <div style="height:200px;"><canvas id="engageChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec">Key Event Summary</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr><th>Event Type</th><th class="tr">Count</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Thank-you page views</td><td class="tr pos">15</td><td style="color:var(--muted);font-size:12px;">Form submissions / completed bookings</td></tr>
+        <tr><td>Residential page actions</td><td class="tr">11</td><td style="color:var(--muted);font-size:12px;">High-engagement residential content</td></tr>
+        <tr><td>Home page interactions</td><td class="tr">6</td><td style="color:var(--muted);font-size:12px;">Entry point conversions</td></tr>
+        <tr><td>Generator page actions</td><td class="tr">2</td><td style="color:var(--muted);font-size:12px;">High-traffic page, low conversion rate — opportunity</td></tr>
+        <tr><td>HVAC repair page actions</td><td class="tr">1</td><td style="color:var(--muted);font-size:12px;">/residential-hvac-repairs</td></tr>
+        <tr><td style="font-weight:600;">Total tracked key events</td><td class="tr" style="font-weight:600;">157</td><td style="color:var(--muted);font-size:12px;">All on-site conversion actions</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">Top Pages</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr><th>Page</th><th class="tr">Views</th><th class="tr">Engagement</th><th class="tr">Key Events</th></tr></thead>
+      <tbody>
+        <tr><td>/</td><td class="tr">1,892</td><td class="tr">68.9%</td><td class="tr">6</td></tr>
+        <tr><td>/home-generators</td><td class="tr">878</td><td class="tr">49.8%</td><td class="tr">2</td></tr>
+        <tr><td>/residential</td><td class="tr">261</td><td class="tr">82.7%</td><td class="tr pos">11</td></tr>
+        <tr><td>/contact</td><td class="tr">104</td><td class="tr">74.6%</td><td class="tr">0</td></tr>
+        <tr><td>/financing</td><td class="tr">92</td><td class="tr">81.8%</td><td class="tr">0</td></tr>
+        <tr><td>/maintenance-plans</td><td class="tr">66</td><td class="tr">85.7%</td><td class="tr">0</td></tr>
+        <tr><td>/chattanooga-location</td><td class="tr">60</td><td class="tr">94.3%</td><td class="tr">0</td></tr>
+        <tr><td>/residential-hvac-repairs</td><td class="tr">52</td><td class="tr">93.8%</td><td class="tr">1</td></tr>
+        <tr><td>/thank-you</td><td class="tr">33</td><td class="tr">93.8%</td><td class="tr pos">15</td></tr>
+        <tr><td>/mini-splits</td><td class="tr">32</td><td class="tr">94.7%</td><td class="tr">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ SEO ═══ -->
+<div id="page-seo" class="page">
+  <div class="page-header">
+    <h1>SEO / Organic Search</h1>
+    <p>April 1–30, 2026 · Google Search Console via GA4</p>
+  </div>
+  <div class="note"><b>Brand terms dominate clicks but non-branded terms have the real scale opportunity.</b> Branded queries generated 74 clicks from 494 impressions (15% avg CTR). Non-branded queries generated only 13 clicks but from 1,226+ impressions — meaning strong visibility exists for competitive terms, but rankings are too low to convert. "mini split installation near me" alone shows 780 impressions at position #43 — a significant opportunity if that ranking improves.</div>
+
+  <div class="sec">Organic Performance</div>
+  <div class="sg">
+    <div class="sc"><div class="lbl">Organic Sessions</div><div class="val">189</div><div class="dlt pos">77.8% engaged</div></div>
+    <div class="sc"><div class="lbl">Organic Clicks</div><div class="val">148</div><div class="dlt neu">From Google Search</div></div>
+    <div class="sc"><div class="lbl">Key Events</div><div class="val">19</div><div class="dlt pos">High-intent visits</div></div>
+  </div>
+
+  <!-- BRANDED / NON-BRANDED SPLIT -->
+  <div class="sec">Branded vs. Non-Branded</div>
+  <div class="split-row">
+    <div class="split-card branded">
+      <div class="split-label">Branded Queries</div>
+      <div class="split-val">74 clicks</div>
+      <div class="split-sub">~494 impressions · ~15% avg CTR</div>
+      <div class="split-sub" style="margin-top:6px;">Ranks #1–2 for own business name. Strong brand recognition. These searchers already know the business.</div>
+    </div>
+    <div class="split-card nonbrand">
+      <div class="split-label">Non-Branded Queries</div>
+      <div class="split-val">13 clicks</div>
+      <div class="split-sub">~1,226 impressions · ~1% avg CTR</div>
+      <div class="split-sub" style="margin-top:6px;">High impression volume but low positions (avg #25–43). Ranking improvements here unlock major new reach.</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:14px 16px 10px;font-size:13px;font-weight:600;border-bottom:.5px solid var(--border);color:var(--purple-txt);background:var(--purple-bg);">Branded Queries</div>
+      <table class="tbl">
+        <thead><tr><th>Query</th><th class="tr">Clicks</th><th class="tr">Impr.</th><th class="tr">CTR</th><th class="tr">Pos.</th></tr></thead>
+        <tbody>
+          <tr><td>american air hvac</td><td class="tr">20</td><td class="tr">133</td><td class="tr">15.0%</td><td class="tr pos">#8</td></tr>
+          <tr><td>american air hvac inc</td><td class="tr">17</td><td class="tr">84</td><td class="tr">20.2%</td><td class="tr pos">#1</td></tr>
+          <tr><td>american air</td><td class="tr">14</td><td class="tr">109</td><td class="tr">12.8%</td><td class="tr pos">#2</td></tr>
+          <tr><td>american air ooltewah</td><td class="tr">8</td><td class="tr">38</td><td class="tr">21.1%</td><td class="tr pos">#1</td></tr>
+          <tr><td>american air chattanooga</td><td class="tr">3</td><td class="tr">22</td><td class="tr">13.6%</td><td class="tr pos">#1</td></tr>
+          <tr><td>american air hvac chattanooga</td><td class="tr">4</td><td class="tr">7</td><td class="tr pos">57.1%</td><td class="tr pos">#1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:14px 16px 10px;font-size:13px;font-weight:600;border-bottom:.5px solid var(--border);color:var(--lime-txt);background:var(--pos-bg);">Non-Branded Queries</div>
+      <table class="tbl">
+        <thead><tr><th>Query</th><th class="tr">Clicks</th><th class="tr">Impr.</th><th class="tr">CTR</th><th class="tr">Pos.</th></tr></thead>
+        <tbody>
+          <tr><td>hvac chattanooga tn</td><td class="tr">2</td><td class="tr">139</td><td class="tr neg">1.4%</td><td class="tr neg">#23</td></tr>
+          <tr><td>mini split installation near me</td><td class="tr">2</td><td class="tr">780</td><td class="tr neg">0.3%</td><td class="tr neg">#43</td></tr>
+          <tr><td>commercial hvac chattanooga tn</td><td class="tr">3</td><td class="tr">44</td><td class="tr">6.8%</td><td class="tr">#23</td></tr>
+          <tr><td>american hvac</td><td class="tr">3</td><td class="tr">45</td><td class="tr">6.7%</td><td class="tr">#14</td></tr>
+          <tr><td>hvac</td><td class="tr">1</td><td class="tr">202</td><td class="tr neg">0.5%</td><td class="tr neg">#7</td></tr>
+          <tr><td>chattanooga hvac</td><td class="tr">1</td><td class="tr">35</td><td class="tr">2.9%</td><td class="tr">#23</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CALLS ═══ -->
+<div id="page-calls" class="page">
+  <div class="page-header">
+    <h1>Calls from Website &amp; Ads</h1>
+    <p>April 1–30, 2026 · CallRail</p>
+  </div>
+  <div class="note"><b>Google Ads drives volume; Organic drives quality.</b> Google Ads generated 77 of 113 calls (68%) but Organic calls converted at 54.5% qualified — nearly 3× the rate of paid. Wednesday and Monday are peak call days; 7am and 9am are the busiest hours. 44 calls ran 2–5 minutes, indicating strong conversation quality. Chat produced 0 qualified leads this month and is worth reviewing.</div>
+
+  <div class="sec">Call Summary</div>
+  <div class="sg">
+    <div class="sc"><div class="lbl">Total Calls</div><div class="val">113</div><div class="dlt neu">April total</div></div>
+    <div class="sc"><div class="lbl">First-Time Callers</div><div class="val">67</div><div class="dlt neu">59% new</div></div>
+    <div class="sc"><div class="lbl">Qualified Calls</div><div class="val">24</div><div class="dlt neu">21.2% rate</div></div>
+    <div class="sc"><div class="lbl">Avg. Duration</div><div class="val">2:23</div><div class="dlt neu">143s average</div></div>
+  </div>
+
+  <!-- KEYWORDS FIRST -->
+  <div class="sec">Top Keywords That Triggered Calls</div>
+  <div class="card">
+    <div class="brs">
+      <div class="br"><span class="br-lbl">heating &amp; air company</span><div class="br-track"><div class="br-fill" style="width:100%;background:var(--lime);"></div></div><span class="br-val">13 calls</span></div>
+      <div class="br"><span class="br-lbl">hvac service</span><div class="br-track"><div class="br-fill" style="width:46%;background:var(--lime);opacity:.7;"></div></div><span class="br-val">6 calls</span></div>
+      <div class="br"><span class="br-lbl">hvac service near me</span><div class="br-track"><div class="br-fill" style="width:38%;background:var(--purple);opacity:.6;"></div></div><span class="br-val">5 calls</span></div>
+      <div class="br"><span class="br-lbl">generac generator</span><div class="br-track"><div class="br-fill" style="width:38%;background:var(--purple);opacity:.6;"></div></div><span class="br-val">5 calls</span></div>
+      <div class="br"><span class="br-lbl">hvac chattanooga</span><div class="br-track"><div class="br-fill" style="width:31%;background:var(--lime);opacity:.5;"></div></div><span class="br-val">4 calls</span></div>
+      <div class="br"><span class="br-lbl">air conditioning repair</span><div class="br-track"><div class="br-fill" style="width:31%;background:var(--lime);opacity:.5;"></div></div><span class="br-val">4 calls</span></div>
+      <div class="br"><span class="br-lbl">standby generator install</span><div class="br-track"><div class="br-fill" style="width:31%;background:var(--purple);opacity:.4;"></div></div><span class="br-val">4 calls</span></div>
+    </div>
+  </div>
+
+  <div class="sec">Source Breakdown</div>
+  <div class="two-col">
+    <div class="card">
+      <h3>Call Volume by Source</h3>
+      <div style="height:200px;"><canvas id="callVolChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Qualified Rate by Source</h3>
+      <div style="height:200px;"><canvas id="callQualChart"></canvas></div>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;margin-top:0;">
+    <table class="tbl">
+      <thead><tr><th>Source</th><th class="tr">Total</th><th class="tr">First-Time</th><th class="tr">Qualified</th><th class="tr">Qual. Rate</th></tr></thead>
+      <tbody>
+        <tr><td>Google Ads</td><td class="tr">77</td><td class="tr">49</td><td class="tr">16</td><td class="tr">20.8%</td></tr>
+        <tr><td>Direct</td><td class="tr">11</td><td class="tr">5</td><td class="tr">2</td><td class="tr">18.2%</td></tr>
+        <tr><td>Google Organic</td><td class="tr">11</td><td class="tr">6</td><td class="tr"><b>6</b></td><td class="tr pos">54.5%</td></tr>
+        <tr><td>Chat</td><td class="tr">10</td><td class="tr">3</td><td class="tr">0</td><td class="tr neg">0%</td></tr>
+        <tr><td>Flypaper</td><td class="tr">3</td><td class="tr">3</td><td class="tr">0</td><td class="tr">—</td></tr>
+        <tr><td>Bing Organic</td><td class="tr">1</td><td class="tr">1</td><td class="tr">0</td><td class="tr">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">Call Outcomes &amp; Timing</div>
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="margin-bottom:18px;">Outcome Tags <span style="font-weight:400;color:var(--muted);font-size:12px;">— 113 total calls</span></h3>
+    <div id="callTagBars" class="brs"></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <h3>Call Duration Distribution</h3>
+      <div style="height:200px;"><canvas id="callDurChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Calls by Day of Week</h3>
+      <div style="height:200px;"><canvas id="callDowChart"></canvas></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0;">
+    <h3>Calls by Hour of Day</h3>
+    <div style="height:180px;"><canvas id="callHourChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══ GOOGLE ADS ═══ -->
+<div id="page-sem" class="page">
+  <div class="page-header">
+    <h1>Google Ads</h1>
+    <p>April 1–30, 2026 · 3 active campaigns</p>
+  </div>
+  <div class="note"><b>Residential Heating is the most efficient campaign</b> — highest CTR (7.41%) and lowest CPC ($6.20) with a 30.2% CVR on the HVAC Company ad group. Residential AC drives the most conversions (30.88). Generac Co-Op is spending the most for the fewest conversions — the Whole Home Generator ad group has zero conversions and a high CPC ($17.54), worth reviewing. Brand terms dominate converting search terms, confirming strong brand recognition in-market.</div>
+
+  <div class="sec">Campaign Overview</div>
+  <div class="sg">
+    <div class="sc"><div class="lbl">Impressions</div><div class="val">5,574</div><div class="dlt neu">April total</div></div>
+    <div class="sc"><div class="lbl">Clicks</div><div class="val">326</div><div class="dlt neu">April total</div></div>
+    <div class="sc"><div class="lbl">Avg. CTR</div><div class="val">5.85%</div><div class="dlt neu">All campaigns</div></div>
+    <div class="sc"><div class="lbl">Avg. CPC</div><div class="val">$10.83</div><div class="dlt neu">All campaigns</div></div>
+    <div class="sc"><div class="lbl">Conversions</div><div class="val">54.88</div><div class="dlt pos">Calls + forms</div></div>
+    <div class="sc"><div class="lbl">Impr. Share</div><div class="val">18.74%</div><div class="dlt neu">of eligible</div></div>
+    <div class="sc"><div class="lbl">Top of Page Rate</div><div class="val">60.41%</div><div class="dlt pos">Strong placement</div></div>
+    <div class="sc"><div class="lbl">Abs. Top Rate</div><div class="val">32.86%</div><div class="dlt neu">Position #1</div></div>
+  </div>
+
+  <div class="sec">Campaign &amp; Ad Group Detail</div>
+  <div class="camp-tabs">
+    <button class="camp-btn active" onclick="showCamp('ac',this)">Residential AC</button>
+    <button class="camp-btn" onclick="showCamp('generac',this)">Generac | Co-Op</button>
+    <button class="camp-btn" onclick="showCamp('heating',this)">Residential Heating</button>
+  </div>
+
+  <div id="camp-ac" class="camp-panel active">
+    <div class="sg" style="margin-bottom:16px;">
+      <div class="sc"><div class="lbl">Impressions</div><div class="val">2,622</div></div>
+      <div class="sc"><div class="lbl">Clicks</div><div class="val">150</div></div>
+      <div class="sc"><div class="lbl">CTR</div><div class="val">5.72%</div></div>
+      <div class="sc"><div class="lbl">Avg. CPC</div><div class="val">$10.60</div></div>
+      <div class="sc"><div class="lbl">Conversions</div><div class="val pos">30.88</div><div class="dlt pos">Most of 3 campaigns</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="tbl">
+        <thead><tr><th>Ad Group</th><th class="tr">Impr.</th><th class="tr">Clicks</th><th class="tr">CTR</th><th class="tr">CPC</th><th class="tr">Conv.</th><th class="tr">CVR</th></tr></thead>
+        <tbody>
+          <tr><td>AC Repair &amp; Maintenance</td><td class="tr">1,262</td><td class="tr">73</td><td class="tr">5.78%</td><td class="tr">$11.26</td><td class="tr">14.00</td><td class="tr">19.2%</td></tr>
+          <tr><td>HVAC Company</td><td class="tr">833</td><td class="tr">68</td><td class="tr pos">8.16%</td><td class="tr">$10.48</td><td class="tr pos">16.88</td><td class="tr pos">24.8%</td></tr>
+          <tr><td>AC Installation &amp; Replacement</td><td class="tr">527</td><td class="tr">9</td><td class="tr neg">1.71%</td><td class="tr">$6.10</td><td class="tr neg">0.00</td><td class="tr neg">0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="camp-generac" class="camp-panel">
+    <div class="sg" style="margin-bottom:16px;">
+      <div class="sc"><div class="lbl">Impressions</div><div class="val">2,223</div></div>
+      <div class="sc"><div class="lbl">Clicks</div><div class="val">122</div></div>
+      <div class="sc"><div class="lbl">CTR</div><div class="val">5.49%</div></div>
+      <div class="sc"><div class="lbl">Avg. CPC</div><div class="val neg">$13.16</div><div class="dlt neg">Highest CPC</div></div>
+      <div class="sc"><div class="lbl">Conversions</div><div class="val">9.00</div><div class="dlt neg">Lowest of 3 campaigns</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="tbl">
+        <thead><tr><th>Ad Group</th><th class="tr">Impr.</th><th class="tr">Clicks</th><th class="tr">CTR</th><th class="tr">CPC</th><th class="tr">Conv.</th><th class="tr">CVR</th></tr></thead>
+        <tbody>
+          <tr><td>Generac Branding</td><td class="tr">1,037</td><td class="tr">86</td><td class="tr pos">8.29%</td><td class="tr">$13.13</td><td class="tr">6.00</td><td class="tr">7.0%</td></tr>
+          <tr><td>Standby Generator</td><td class="tr">873</td><td class="tr">30</td><td class="tr">3.44%</td><td class="tr">$12.37</td><td class="tr">3.00</td><td class="tr">10.0%</td></tr>
+          <tr><td>Whole Home Generator</td><td class="tr">313</td><td class="tr">6</td><td class="tr neg">1.92%</td><td class="tr neg">$17.54</td><td class="tr neg">0.00</td><td class="tr neg">0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="camp-heating" class="camp-panel">
+    <div class="sg" style="margin-bottom:16px;">
+      <div class="sc"><div class="lbl">Impressions</div><div class="val">729</div></div>
+      <div class="sc"><div class="lbl">Clicks</div><div class="val">54</div></div>
+      <div class="sc"><div class="lbl">CTR</div><div class="val pos">7.41%</div><div class="dlt pos">Highest of 3</div></div>
+      <div class="sc"><div class="lbl">Avg. CPC</div><div class="val pos">$6.20</div><div class="dlt pos">Most efficient</div></div>
+      <div class="sc"><div class="lbl">Conversions</div><div class="val">15.00</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="tbl">
+        <thead><tr><th>Ad Group</th><th class="tr">Impr.</th><th class="tr">Clicks</th><th class="tr">CTR</th><th class="tr">CPC</th><th class="tr">Conv.</th><th class="tr">CVR</th></tr></thead>
+        <tbody>
+          <tr><td>HVAC Company</td><td class="tr">628</td><td class="tr">42</td><td class="tr">6.69%</td><td class="tr pos">$4.40</td><td class="tr pos">12.67</td><td class="tr pos">30.2%</td></tr>
+          <tr><td>Heating Repair &amp; Maintenance</td><td class="tr">95</td><td class="tr">11</td><td class="tr pos">11.58%</td><td class="tr">$11.83</td><td class="tr">2.33</td><td class="tr">21.2%</td></tr>
+          <tr><td>Heating Install &amp; Replacement</td><td class="tr">6</td><td class="tr">1</td><td class="tr">16.67%</td><td class="tr">$19.90</td><td class="tr neg">0.00</td><td class="tr neg">0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">Auction Insights — Competitor View</div>
+  <div class="note" style="margin-bottom:16px;"><b>What this means:</b> Search Impression Share shows what percentage of eligible auctions your ads actually appeared in — American Air won 18.74% of the auctions it was eligible for. Top of Page Rate (60.41%) means when ads did show, they appeared above organic results more than 60% of the time — strong placement. Abs. Top Rate (32.86%) is the #1 ad position. Baileys and Lee Company show lower impression share but higher top-of-page rates, meaning they win fewer auctions overall but tend to outbid for premium placement when they do compete.</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr><th>Domain</th><th class="tr">Search Impr. Share</th><th class="tr">Top of Page Rate</th><th class="tr">Abs. Top Rate</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-you">You</span></td><td class="tr pos">18.74%</td><td class="tr">60.41%</td><td class="tr">32.86%</td></tr>
+        <tr><td>expertservicesllc.com</td><td class="tr">12.16%</td><td class="tr neg">41.33%</td><td class="tr">23.40%</td></tr>
+        <tr><td>baileysheatandair.com</td><td class="tr">&lt;10%</td><td class="tr">70.03%</td><td class="tr pos">39.26%</td></tr>
+        <tr><td>leecompany.com</td><td class="tr">&lt;10%</td><td class="tr pos">81.88%</td><td class="tr">30.15%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">Top Converting Search Terms</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr><th>Search Term</th><th>Campaign</th><th class="tr">Clicks</th><th class="tr">Conv.</th><th class="tr">CVR</th></tr></thead>
+      <tbody>
+        <tr><td>generac generator</td><td>Generac</td><td class="tr">20</td><td class="tr">4.00</td><td class="tr">20.0%</td></tr>
+        <tr><td>american air ooltewah</td><td>Residential AC</td><td class="tr">7</td><td class="tr">2.89</td><td class="tr pos">41.2%</td></tr>
+        <tr><td>american air hvac inc</td><td>Res. Heating</td><td class="tr">3</td><td class="tr">3.00</td><td class="tr pos">100%</td></tr>
+        <tr><td>american air chattanooga</td><td>Res. Heating</td><td class="tr">2</td><td class="tr">3.00</td><td class="tr pos">150%</td></tr>
+        <tr><td>american air hvac ooltewah</td><td>Residential AC</td><td class="tr">2</td><td class="tr">3.00</td><td class="tr pos">150%</td></tr>
+        <tr><td>american heating and air</td><td>Res. AC</td><td class="tr">1</td><td class="tr">2.00</td><td class="tr pos">200%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ PROGRAMMATIC ═══ -->
+<div id="page-programmatic" class="page">
+  <div class="page-header">
+    <h1>Programmatic</h1>
+    <p>April 1–30, 2026 · The Trade Desk via Flypaper</p>
+  </div>
+  <div class="sub-nav">
+    <button class="sub-tab active" onclick="showSub('display',this)">Display</button>
+    <button class="sub-tab" onclick="showSub('ctv',this)">CTV</button>
+  </div>
+
+  <!-- DISPLAY -->
+  <div id="sub-display" class="sub-page active">
+    <div class="note"><b>Display is the top traffic driver this month</b> — 938 website sessions at a $2.02 CPM, outperforming Google Ads (255 sessions) and Organic (189 sessions) on raw volume. CTR of 0.14% is running at 2× the industry average of 0.05–0.08%. Behavioral targeting delivers the most impressions and highest CTR; Contextual is the second-largest volume. VTC (view-through conversion) data is not included in this export — those figures are available in the TTD dashboard.</div>
+
+    <div class="sec">Display Overview</div>
+    <div class="sg">
+      <div class="sc"><div class="lbl">Impressions</div><div class="val">198,035</div><div class="dlt neu">April total</div></div>
+      <div class="sc"><div class="lbl">Clicks</div><div class="val">286</div><div class="dlt neu">April total</div></div>
+      <div class="sc"><div class="lbl">CTR</div><div class="val">0.14%</div><div class="dlt pos">2× industry avg</div></div>
+      <div class="sc"><div class="lbl">CPM</div><div class="val">$2.02</div><div class="dlt pos">Efficient reach</div></div>
+      <div class="sc"><div class="lbl">Website Sessions</div><div class="val">938</div><div class="dlt pos">#1 channel for sessions</div></div>
+    </div>
+
+    <div class="sec">Impressions by Ad Group</div>
+    <div class="card">
+      <h3>Ad Group Performance</h3>
+      <div style="height:220px;"><canvas id="displayGroupChart"></canvas></div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-top:0;">
+      <table class="tbl">
+        <thead><tr><th>Ad Group</th><th class="tr">Impressions</th><th class="tr">Clicks</th><th class="tr">CTR</th><th class="tr">CPM</th></tr></thead>
+        <tbody>
+          <tr><td>Behavioral</td><td class="tr">108,418</td><td class="tr pos">175</td><td class="tr pos">0.16%</td><td class="tr pos">$1.51</td></tr>
+          <tr><td>Contextual</td><td class="tr">82,865</td><td class="tr">96</td><td class="tr">0.12%</td><td class="tr">$2.62</td></tr>
+          <tr><td>CTV Retargeting</td><td class="tr">5,723</td><td class="tr">13</td><td class="tr pos">0.23%</td><td class="tr">$2.68</td></tr>
+          <tr><td>Contextual – Keywords</td><td class="tr">544</td><td class="tr">1</td><td class="tr">0.18%</td><td class="tr">$3.25</td></tr>
+          <tr><td>Retargeting</td><td class="tr">485</td><td class="tr">1</td><td class="tr">0.21%</td><td class="tr neg">$4.01</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">Top Cities by Impressions</div>
+    <div class="card">
+      <div class="brs">
+        <div class="br"><span class="br-lbl">Chattanooga</span><div class="br-track"><div class="br-fill" style="width:100%;background:var(--purple);opacity:.7;"></div></div><span class="br-val">~95K</span></div>
+        <div class="br"><span class="br-lbl">Hixson</span><div class="br-track"><div class="br-fill" style="width:34%;background:var(--purple);opacity:.5;"></div></div><span class="br-val">~32K</span></div>
+        <div class="br"><span class="br-lbl">Cleveland</span><div class="br-track"><div class="br-fill" style="width:25%;background:var(--lime);opacity:.7;"></div></div><span class="br-val">~24K</span></div>
+        <div class="br"><span class="br-lbl">Ooltewah</span><div class="br-track"><div class="br-fill" style="width:19%;background:var(--lime);opacity:.55;"></div></div><span class="br-val">~18K</span></div>
+        <div class="br"><span class="br-lbl">Ringgold</span><div class="br-track"><div class="br-fill" style="width:13%;background:var(--purple);opacity:.35;"></div></div><span class="br-val">~12K</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTV -->
+  <div id="sub-ctv" class="sub-page">
+    <div class="note"><b>CTV drove 123 attributed website sessions with a 65.9% engagement rate</b> — the highest of any channel. The 5-second and 15-second creatives outperformed the 30-second spot in total impressions (21,405 and 21,004 vs 17,798), likely due to higher completion rates unlocking broader placement inventory. Delivery picked up significantly in the second half of April (Apr 17–30 averaged ~2,300 impressions/day vs ~1,700 in the first half).</div>
+
+    <div class="sec">CTV Overview</div>
+    <div class="sg">
+      <div class="sc"><div class="lbl">Impressions</div><div class="val">60,207</div><div class="dlt neu">April total</div></div>
+      <div class="sc"><div class="lbl">Unique Households</div><div class="val">~4,200</div><div class="dlt neu">Est. from TTD</div></div>
+      <div class="sc"><div class="lbl">CPM</div><div class="val">$19.75</div><div class="dlt neu">Cost per 1K impr.</div></div>
+      <div class="sc"><div class="lbl">Website Sessions</div><div class="val">123</div><div class="dlt pos">65.9% engaged</div></div>
+      <div class="sc"><div class="lbl">Retargeting CTR</div><div class="val">0.23%</div><div class="dlt neu">5,723 retarg. impr.</div></div>
+    </div>
+
+    <div class="sec">Daily Impressions — April</div>
+    <div class="card">
+      <h3>Delivery by Day</h3>
+      <div style="height:200px;"><canvas id="ctvDailyChart"></canvas></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Impressions by Creative</h3>
+        <div style="height:160px;"><canvas id="ctvCreativeChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>YTD Monthly Impressions</h3>
+        <div style="height:160px;"><canvas id="ctvYtdChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Powered by <a href="https://www.customerswhostick.com" target="_blank">Flypaper</a> · American Air HVAC · April 2026</div>
+
+<script>
+Chart.defaults.font.family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.color='#6B6B80';
+const L='#6EB832',P='#7B5EA7',LA='rgba(110,184,50,.7)',PA='rgba(123,94,167,.5)';
+const rendered=new Set();
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(!rendered.has(id)){rendered.add(id);buildCharts(id);}
+  // Auto-render default sub-tab charts when programmatic page first opens
+  if(id==='programmatic'&&!rendered.has('prog-display')){
+    rendered.add('prog-display');buildProgCharts('display');
+  }
+}
+function showCamp(id,btn){
+  document.querySelectorAll('.camp-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.camp-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('camp-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+function showSub(id,btn){
+  document.querySelectorAll('.sub-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sub-'+id).classList.add('active');
+  btn.classList.add('active');
+  const key='prog-'+id;
+  if(!rendered.has(key)){rendered.add(key);buildProgCharts(id);}
+}
+
+function buildCharts(id){
+  if(id==='website'){
+    new Chart(document.getElementById('trafficChart'),{type:'doughnut',data:{labels:['Display','Direct','Google Ads','Organic','CTV','Facebook','Other'],datasets:[{data:[938,378,255,189,123,48,77],backgroundColor:[P,PA,'#8A6DC0',LA,L,'#9090A8','#C0B8D8'],borderWidth:0}]},options:{cutout:'65%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:8,font:{size:10}}}}}});
+    new Chart(document.getElementById('engageChart'),{type:'bar',data:{labels:['Facebook','Display','Direct','CTV','Bing','Organic','G. Ads'],datasets:[{data:[81,55,58,66,70,78,78],backgroundColor:[PA,PA,PA,LA,LA,L,L],borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:100,grid:{color:'#F0F0F6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
+  }
+  if(id==='calls'){
+    new Chart(document.getElementById('callVolChart'),{type:'bar',data:{labels:['G. Ads','Direct','G. Organic','Chat','Flypaper','Bing'],datasets:[{data:[77,11,11,10,3,1],backgroundColor:[L,PA,LA,PA,P,'#C0B8D8'],borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#F0F0F6'}},x:{grid:{display:false}}}}});
+    new Chart(document.getElementById('callQualChart'),{type:'bar',data:{labels:['G. Organic','G. Ads','Direct','Chat','Flypaper'],datasets:[{data:[54.5,20.8,18.2,0,0],backgroundColor:[L,LA,PA,PA,PA],borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:70,grid:{color:'#F0F0F6'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+    // Outcome Tags — horizontal bar rows
+    const tagData=[
+      {label:'Existing Customer',val:28,color:P},
+      {label:'Abandoned',val:23,color:'#E05050'},
+      {label:'Opportunity',val:18,color:L},
+      {label:'Other',val:13,color:PA},
+      {label:'Missed Call',val:10,color:'#C09030'},
+      {label:'After Hours',val:8,color:LA},
+      {label:'Service Call',val:8,color:'#60A870'},
+      {label:'Spam / Other',val:5,color:'#C0B8D8'},
+    ];
+    const total=113;
+    const brsEl=document.getElementById('callTagBars');
+    tagData.forEach(t=>{
+      const pct=Math.round(t.val/total*100);
+      brsEl.innerHTML+=`<div class="br">
+        <div class="br-lbl">${t.label}</div>
+        <div class="br-track"><div class="br-fill" style="width:${pct}%;background:${t.color};"></div></div>
+        <div class="br-val" style="width:80px;display:flex;justify-content:space-between;"><span style="color:var(--muted)">${pct}%</span><span style="font-weight:700;">${t.val}</span></div>
+      </div>`;
+    });
+    new Chart(document.getElementById('callDurChart'),{type:'bar',data:{labels:['Abandoned','< 30s','30–60s','1–2 min','2–5 min','5+ min'],datasets:[{data:[4,24,15,11,44,15],backgroundColor:[PA,PA,'#C0B8D8',LA,L,L],borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#F0F0F6'}},x:{grid:{display:false}}}}});
+    new Chart(document.getElementById('callDowChart'),{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{data:[27,9,30,21,23,2,1],backgroundColor:(ctx)=>[27,9,30,21,23,2,1][ctx.dataIndex]>=25?L:LA,borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#F0F0F6'}},x:{grid:{display:false}}}}});
+    new Chart(document.getElementById('callHourChart'),{type:'bar',data:{labels:['5a','6a','7a','8a','9a','10a','11a','12p','1p','2p','3p','4p','5p','6p'],datasets:[{data:[1,1,16,10,16,11,8,12,10,13,8,2,4,1],backgroundColor:(ctx)=>[1,1,16,10,16,11,8,12,10,13,8,2,4,1][ctx.dataIndex]>=14?L:PA,borderRadius:3}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#F0F0F6'}},x:{grid:{display:false}}}}});
+  }
+}
+
+function buildProgCharts(sub){
+  if(sub==='display'){
+    new Chart(document.getElementById('displayGroupChart'),{
+      type:'bar',
+      data:{
+        labels:['Behavioral','Contextual','CTV Retargeting','Contextual–Keywords','Retargeting'],
+        datasets:[
+          {label:'Impressions',data:[108418,82865,5723,544,485],backgroundColor:LA,borderRadius:3,yAxisID:'y'},
+          {label:'Clicks',data:[175,96,13,1,1],backgroundColor:P,borderRadius:3,yAxisID:'y1'}
+        ]
+      },
+      options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:12}}},scales:{y:{beginAtZero:true,position:'left',grid:{color:'#F0F0F6'},title:{display:true,text:'Impressions',font:{size:10}}},y1:{beginAtZero:true,position:'right',grid:{display:false},title:{display:true,text:'Clicks',font:{size:10}}},x:{grid:{display:false}}}}
+    });
+  }
+  if(sub==='ctv'){
+    const days=Array.from({length:30},(_,i)=>i+1);
+    const daily=[1842,1635,1682,1652,1642,1714,1744,1705,1665,1605,1670,1743,1680,1636,1578,1782,2572,2605,2454,2657,2649,2105,2324,2055,1985,1996,2106,2499,2611,2614];
+    new Chart(document.getElementById('ctvDailyChart'),{type:'bar',data:{labels:days,datasets:[{data:daily,backgroundColor:(ctx)=>ctx.dataIndex>=16?L:LA,borderRadius:2}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#F0F0F6'}},x:{grid:{display:false},ticks:{maxTicksLimit:10}}}}});
+    new Chart(document.getElementById('ctvCreativeChart'),{type:'bar',data:{labels:['5 sec','15 sec','30 sec'],datasets:[{data:[21405,21004,17798],backgroundColor:[L,LA,PA],borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{y:{grid:{display:false}},x:{beginAtZero:true,grid:{color:'#F0F0F6'}}}}});
+    new Chart(document.getElementById('ctvYtdChart'),{type:'bar',data:{labels:['Jan','Feb','Mar','Apr'],datasets:[{data:[55000,48000,61819,60207],backgroundColor:['#C0B8D8','#C0B8D8','#C0B8D8',L],borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#F0F0F6'}},x:{grid:{display:false}}}}});
+  }
+}
+</script>
+</body>
+</html>
